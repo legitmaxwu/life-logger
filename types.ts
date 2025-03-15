@@ -29,10 +29,12 @@ export interface Habit {
   userId: string;
   name: string;
   unit: string;
+  field: string;
   logTypeIds: Id<"logTypes">[];
   interval: "day" | "week";
   rule: {
     operator: "gt" | "lt" | "eq";
     value: number;
   };
+  iconId?: Id<"icons">;
 }

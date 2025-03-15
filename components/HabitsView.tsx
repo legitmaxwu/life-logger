@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PlusCircle, Trash2, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LogType } from "@/types";
 import HabitForm from "./HabitForm";
 import React from "react";
-import { calculateDailyValue } from "../convex/habits";
 import LogTypeIcon from "./LogTypeIcon";
+import { Habit, Log, LogType } from "@/types";
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { Id } from "../convex/_generated/dataModel";
 
 // Solid colors for completed days
 const habitColors = [
@@ -53,16 +53,18 @@ function getColorStyle(
 
 export default function HabitsView() {
   const [showForm, setShowForm] = useState(false);
-  const [editingHabit, setEditingHabit] = useState<any>(null);
-  const logTypes = useQuery(api.logTypes.list) || [];
-  const habits = useQuery(api.habits.list) || [];
-  const habitStatuses = useQuery(api.habits.getStatuses) || {};
-  const allLogs = useQuery(api.logs.list) || [];
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+
+  // Wrap query results in useMemo to fix exhaustive-deps warning
+  const logTypes = useQuery(api.logTypes.list) ?? [];
+  const habits = useQuery(api.habits.list) ?? [];
+  const habitStatuses = useQuery(api.habits.getStatuses) ?? {};
+  const allLogs = useQuery(api.logs.list) ?? [];
   const deleteHabit = useMutation(api.habits.remove);
 
   // Group logs by habit
-  const logsByHabit = React.useMemo(() => {
-    const map = new Map();
+  const logsByHabit = useMemo(() => {
+    const map = new Map<Id<"habits">, Log[]>();
     for (const habit of habits) {
       map.set(
         habit._id,
@@ -73,12 +75,18 @@ export default function HabitsView() {
   }, [habits, allLogs]);
 
   // Get the value for a specific field from a log
-  const getLogValue = (log: any, field: string) => {
+  const getLogValue = (log: Log, field: string): number => {
     return parseFloat(log.values[field]) || 0;
   };
 
   // Calculate daily value considering all tracked fields
-  const calculateDailyValue = (logs: any[], habit: any, date: Date) => {
+  const calculateDailyValue = (
+    logs: Log[] | undefined,
+    habit: Habit,
+    date: Date,
+  ): number => {
+    if (!logs) return 0;
+
     const dayStart = new Date(date);
     dayStart.setHours(0, 0, 0, 0);
     const dayEnd = new Date(date);
@@ -123,7 +131,7 @@ export default function HabitsView() {
         <Card className="p-6 border-pencil/10 bg-paper shadow-sm">
           <HabitForm
             logTypes={logTypes}
-            initialData={editingHabit}
+            initialData={editingHabit || undefined}
             onComplete={() => {
               setShowForm(false);
               setEditingHabit(null);

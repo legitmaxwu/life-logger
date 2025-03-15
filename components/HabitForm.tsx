@@ -197,7 +197,7 @@ export default function HabitForm({
                 new Set(
                   compatibleLogTypes.flatMap((type) =>
                     Object.entries(type.quantities.fields)
-                      .filter(([_, config]) => config.unit === selectedUnit)
+                      .filter(([, config]) => config.unit === selectedUnit)
                       .map(([field]) => field),
                   ),
                 ),

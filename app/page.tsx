@@ -13,7 +13,6 @@ import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import LogsView from "../components/LogsView";
 import HabitsView from "../components/HabitsView";
 import LogTypesView from "../components/LogTypesView";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function Home() {
   return (

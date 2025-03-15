@@ -30,7 +30,7 @@ interface Streak {
   rule: {
     field: string;
     operator: "exists" | "gt" | "lt" | "eq";
-    value?: any;
+    value?: number;
   };
   target: number;
 }
